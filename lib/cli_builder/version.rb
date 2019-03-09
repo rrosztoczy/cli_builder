@@ -1,3 +1,3 @@
-module Clibuilder
+module CliBuilder
   VERSION = "0.1.0"
 end

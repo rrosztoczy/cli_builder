@@ -1,11 +1,13 @@
-require "clibuilder/version"
+require "cli_builder/version"
+
+#Build an exe that buils the crud from a db model :P.
 
 module Clibuilder
   class Error < StandardError; end
 
 
 #Build out terminal application menu and user interaction behavior
-module CLI_Builder
+module CliBuilder
 
   #The ApplicationInterfaceBuilder class is responsible for building the menus and application interaction functionality (the if tree and method calls that underly the menu functionality).
   class ApplicationInterfaceBuilder
@@ -96,4 +98,5 @@ module CLI_Builder
       application_builder("Find Ride Data by Type", ride_type_array)
   #   end
   end
+end
 end
