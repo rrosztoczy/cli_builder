@@ -1,5 +1,6 @@
 require "bundler/setup"
-require "cli_builder"
+require_relative "../lib/cli_builder.rb"
+require_relative "../lib/cli_builder/menu.rb"
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure

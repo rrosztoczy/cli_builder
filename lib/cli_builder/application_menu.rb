@@ -41,7 +41,7 @@ module CliBuilder
         
             #look through each option and compare to input, if it has an associated method, run it. If no matches, prompt to enter a valid option and start again.
             method_names.each_with_index do |method_name, index|
-                if user_input.to_i == index + 1
+                if user_input.to_i == index + 1 
                     #had return send(method_name)
                     send(method_name)
                 end

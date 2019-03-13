@@ -5,7 +5,7 @@ require "cli_builder/version"
 
 Gem::Specification.new do |spec|
   spec.name          = "cli_builder"
-  spec.version       = Clibuilder::VERSION
+  spec.version       = CliBuilder::VERSION
   spec.authors       = ["<rrosztoczy>"]
   spec.email         = ["<rrosztoczy@gmail.com>"]
 
