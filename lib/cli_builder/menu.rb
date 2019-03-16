@@ -2,16 +2,12 @@ require 'pry'
 module CliBuilder
 
     class Menu
-            attr_accessor :title, :parent, :menu_options
+            attr_accessor :title, :menu_options
             @@all = []
 
-            #[] - Allow a user to use CliBuilder:Menu functionality to print a menu tree for their cli application 
-                # -This could work by allowing them to create a menu class that inherits from CliBuilder::Menu
-                # -How to let them see the available methods and instructions?
-            #[] - Allow a user to use CliBuilder:Menu functionality to build the menu interactive application functionality for their cli application menu tree
 
 
-            def initialize(title: 'default menu title', parent: nil,  menu_options: [])
+            def initialize(title: 'default menu title', menu_options: [])
                 # super #is this necessary to allow for other methods to still be useable or not necessary?
 
                 #This would be the the code that creates the hash based on their arguments in the following manner:
@@ -25,11 +21,6 @@ module CliBuilder
                 #I think it would be userful to format all inputs in symbol like form for passing around as messages and then reformatting on display depending
                 #on the usecase... but this may not be necessary
                 self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
-                if parent != nil
-                    self.parent = parent.title.to_s.gsub(/\s+/,"_").downcase.to_sym
-                else 
-                    self.parent = parent
-                end
                 self.menu_options = menu_options
                 Menu.all << self
             end
@@ -127,7 +118,13 @@ module CliBuilder
 
         def build_menu_body
             #take array of method titles and turn into menu
-            menu_options.each_with_index {|menu_option, index| puts "#{index + 1}. #{titlecase(menu_option.to_s)}"}
+            menu_options.each_with_index do |menu_option, index| 
+                if menu_option.class == CliBuilder::Menu
+                    puts "#{index + 1}. #{titlecase(menu_option.title.to_s)}"
+                else
+                    puts "#{index + 1}. #{titlecase(menu_option.to_s)}"
+                end
+            end
             puts ""
             puts "Please enter your selection:"
         end
@@ -143,7 +140,6 @@ module CliBuilder
             if !user_input.to_i.between?(1, menu_options.length)
                 user_input_validation
             else
-                puts "in app logic!"
                 execute_application_logic(user_input)
             end
         end
@@ -153,7 +149,6 @@ module CliBuilder
             self.menu_options.each_with_index do |menu_option, index|
                 if user_input.to_i == index + 1
                     #had return send(menu_options)
-                    binding.pry
                     if menu_option.class == CliBuilder::Menu
                         menu_option.build_menu
                     else
