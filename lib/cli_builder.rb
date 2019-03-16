@@ -5,6 +5,6 @@ require "cli_builder/version"
 module CliBuilder
   class Error < StandardError; end
 
-  #The ApplicationInterfaceBuilder class is responsible for building the menus and application interaction functionality (the if tree and method calls that underly the menu functionality).
+  #What functionality should put here besides the convenience on using it for namespacing? Methods that I would want to extend to other cli_builder classes.
 
 end
