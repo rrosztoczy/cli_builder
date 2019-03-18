@@ -1,13 +1,13 @@
-require 'pry'
+# require 'pry'
 module CliBuilder
 
     class Menu
-            attr_accessor :title, :menu_options
+            attr_accessor :title, :menu_options, :previous_menu, :main_menu
             @@all = []
 
 
 
-            def initialize(title: 'default menu title', menu_options: [])
+            def initialize(title: 'default menu title', menu_options: [], previous_menu: nil)
                 # super #is this necessary to allow for other methods to still be useable or not necessary?
 
                 #This would be the the code that creates the hash based on their arguments in the following manner:
@@ -79,13 +79,15 @@ module CliBuilder
 
 
             def build_menu
+                #This needs to be called everytime a menu option that is not a method is called
+
+                #But also, when a method is called it should not exit this
                 self.build_menu_title
                 self.build_menu_body
                 self.build_application
             end
 
             #functionality to clear out current menus for redesign
-
             def clear
             end
 
@@ -125,6 +127,8 @@ module CliBuilder
                     puts "#{index + 1}. #{titlecase(menu_option.to_s)}"
                 end
             end
+            puts "#{menu_options.length + 1}. Back to Previous Menu"
+            puts "#{menu_options.length + 2}. Back to Main Menu"
             puts ""
             puts "Please enter your selection:"
         end
@@ -136,6 +140,7 @@ module CliBuilder
         
         #Dynamically build application interaction functionality (if tree based on menu selection that runs selected methods)
         def build_application
+            #I believe this is where I want to loop
             user_input = get_user_input
             if !user_input.to_i.between?(1, menu_options.length)
                 user_input_validation
@@ -144,15 +149,26 @@ module CliBuilder
             end
         end
 
+        #TODO: Test Main/Prev Menu Logic then Looping Logic
         #Get user input, exit on exit
         def execute_application_logic(user_input)
+            @@main_menu ||= self
+            previous_menu = self
             self.menu_options.each_with_index do |menu_option, index|
-                if user_input.to_i == index + 1
+            if user_input.to_i == menu_options.length
+                self.previous_menu.build_menu
+            elsif user_input.to_i == menu_options.length + 1
+                @@main_menu.build_menu
+            elsif user_input.to_i == index + 1
                     #had return send(menu_options)
                     if menu_option.class == CliBuilder::Menu
+                        #This should allow looping through menu options
+                        menu_option.previous_menu = previous_menu
                         menu_option.build_menu
                     else
+                        #Need to build current menu again after
                         send(menu_option)
+                        self.build_menu
                     end
                 end
             end
