@@ -7,11 +7,13 @@ RSpec.describe CliBuilder::Menu do
         expect{test_menu.build_menu_title}.to output("Test Menu Title!\n\n").to_stdout
     end
     it "has instances which can display their menu options in the terminal" do
-        expect{test_menu.build_menu_body}.to output("1. Menu Option One\n2. Menu Option Two\n3. Menu Option Three\n\nPlease enter your selection:\n").to_stdout
+        expect{test_menu.build_menu_body}.to output("1. Menu Option One\n2. Menu Option Two\n3. Menu Option Three\n4. Back to Previous Menu\n5. Back to Main Menu\n\nPlease enter your selection:\n").to_stdout
     end
     # it "has instances which can build the logic underlying the selection of its available menu options" do
     #     expect{test_menu.build_menu_body}.to output("1. Menu Option One\n2. Menu Option Two\n3. Menu Option Three\nPlease enter your selection:\n").to_stdout
     # end
+
+    # Unit testing for behavior: has  main menu, traverse menu levels, can exit with exit, etc.
   end
 
 
