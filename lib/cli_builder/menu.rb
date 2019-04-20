@@ -10,18 +10,20 @@ module CliBuilder
 
     # April 20th, 2019 To Dos
     #TODO: Refactor main menu area (2 hours)
-        # [] SRP Class Refactor: Ask methods as questions of the class
-        # [] SRP Method Refactor: Ask what the methods responsibilities are - look for and/or
+        # [?] SRP Class Refactor (1 hr): Ask methods as questions of the class
+        # [X] SRP Method Refactor: Ask what the methods responsibilities are - look for and/or
         # [X] Dependency refactor: dependency injection (for [X] class names, [X] class methods and their args), [X]attribute ordering
         # [X] Private vs. public
-    #TODO: Build Crud section (8 hours)
+    #TODO: Build Crud section (6 hours)
     #TODO: Formatting options (3 hours)
         # [] Make sure clear, method results and menu options print out is okay.. do not think it is
         # [] Make placement etc. flexible so they can add titles, adjust placement whatever they want
 
+    # Is there really like... a menu gui here... and a menu application?
 
- 
-    
+    # Should there be like a fundamental menu class that creates the news, rarely changes, and then 
+    # Gui and application classes which inheret from it? Would they need different things? Fomratting could be restricted to Gui,
+    # Advanced applciation logic to the application 
     class Menu
         attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option
         @@all = [];
@@ -66,17 +68,17 @@ module CliBuilder
             puts ""
         end
 
-        def build_menu_body
-            menu_options.each_with_index do |menu_option, index| 
-                printMenuOption(menu_option: menu_option, index: index)
-            end
-            
-            #Do not add Back options to main menu
-            if self != self.class.main_menu
-                printPreviousMenuOption
-                printMainMenuOption
-            end
-            printPrompt
+            def build_menu_body
+                menu_options.each_with_index do |menu_option, index| 
+                    printMenuOption(menu_option: menu_option, index: index)
+                end
+
+                #Do not add Back options to main menu
+                if self != self.class.main_menu
+                    printPreviousMenuOption
+                    printMainMenuOption
+                end
+                printPrompt
         end
         
 
@@ -89,99 +91,134 @@ module CliBuilder
             end
         end
 
-    private
-    def titlecase(string)
-        string.split("_").each {|word| word.capitalize!}.join(" ")
-    end
+        private
+        def titlecase(string)
+            string.split("_").each {|word| word.capitalize!}.join(" ")
+        end
 
-    def menu_option_number(index)
-        index + 1
-    end
+        def menu_option_number(index)
+            index + 1
+        end
 
-    def assign_parents(menu_options)
-        menu_options.each do | menu_option | 
-            if menu_option.class == self.class
-                menu_option.parent = self
-            end
-        end 
-    end
+        def assign_parent(menu_option)
+            menu_option.parent = self
+        end
 
-    def get_user_input
-        user_input = gets.chomp
-        user_input == "exit" ? exit : user_input
-    end
+        def assign_parents(menu_options)
+            menu_options.each do | menu_option | 
+                if menu_option.class == self.class
+                    assign_parent(menu_option)
+                end
+            end 
+        end
 
-    def printPrompt
-        puts ""
-        puts "Please enter your selection:"
-    end
+        def get_user_input
+            user_input = gets.chomp
+            user_input == "exit" ? exit : user_input
+        end
 
-    def printMainMenuOption
-        puts "#{main_menu_option}. Back to Main Menu"
-    end
+        def printPrompt
+            puts ""
+            puts "Please enter your selection:"
+        end
 
-    def printPreviousMenuOption
-        puts "#{previous_menu_option}. Back to Previous Menu"
-    end
+        def printMainMenuOption
+            puts "#{main_menu_option}. Back to Main Menu"
+        end
 
-    def printMenuOption(menu_option:, index:)
-        if menu_option.class == self.class
+        def printPreviousMenuOption
+            puts "#{previous_menu_option}. Back to Previous Menu"
+        end
+
+        def printMenuTitle(menu_option:, index:)
             puts "#{menu_option_number(index)}. #{titlecase(menu_option.title.to_s)}"
-        else
+        end
+
+        def printMethodName(menu_option:, index:)
             puts "#{menu_option_number(index)}. #{titlecase(menu_option.to_s)}"
         end
-    end
 
-    def user_input_validation
-        system "clear" or system "cls"
-        puts "\n****Error: Please enter a valid number****"
-        puts "\n"
-        build_menu
-end
+        def printInputValidation
+            puts "\n****Error: Please enter a valid number****"
+            puts "\n"
+        end
 
-# Come back to this after crud to see if you can make an improved send
-        # Can I reogranize the code to make these the same?
-        # def printMenuTitle
-        # end
+        def printMenuOption(menu_option:, index:)
+            if menu_option.class == self.class
+                printMenuTitle(menu_option: menu_option, index: index)
+            else
+                printMethodName(menu_option: menu_option, index: index)
+            end
+        end
 
-        # def printMethodName
-        # end
-
-        # Can I dynamically program a method so that its name is dynamic, 
-        # and it takes a send of a menu option and retrieves the actual object
-        # I need the name of the object to be a method that retrieves the object. So what about a method that takes a symbol
-        # and either gets or sends it?
-def call_menu_option(menu_option)
-    if menu_option.class == self.class
-        menu_option.build_menu
-    else
-        send(menu_option)
-        build_menu
-    end
-end
-
-def execute_application_logic(user_input)
-    menu_options.each_with_index do |menu_option, index|
-        case user_input
-        when previous_menu_option
+        def user_input_validation
             system "clear" or system "cls"
-            parent.build_menu
-        when main_menu_option
-            system "clear" or system "cls"
-            self.class.main_menu.build_menu
-        when menu_option_number(index)
-            system "clear" or system "cls"
-            call_menu_option(menu_option)
+            printInputValidation
+            build_menu
+        end
+
+    # Come back to this after crud to see if you can make an improved send
+            # Can I reogranize the code to make these the same?
+
+
+            # Can I dynamically program a method so that its name is dynamic, 
+            # and it takes a send of a menu option and retrieves the actual object
+            # I need the name of the object to be a method that retrieves the object. So what about a method that takes a symbol
+            # and either gets or sends it?
+        def call_menu_option(menu_option)
+            if menu_option.class == self.class
+                menu_option.build_menu
+            else
+                send(menu_option)
+                build_menu
+            end
+        end
+
+        def execute_application_logic(user_input)
+            menu_options.each_with_index do |menu_option, index|
+                case user_input
+                when previous_menu_option
+                    system "clear" or system "cls"
+                    parent.build_menu
+                when main_menu_option
+                    system "clear" or system "cls"
+                    self.class.main_menu.build_menu
+                when menu_option_number(index)
+                    system "clear" or system "cls"
+                    call_menu_option(menu_option)
+                end
+            end
         end
     end
-end
-end
 
 
-  #********************************************************CRUD Class***********************************************************************
-#   The goal of this will be to allow CRUD on table rows from the menu... can I do it based on values dynamically like below or is that
-#   Too much? If that is too much... can I do it for just full on table row items based on the table name?
+#   #********************************************************CRUD Class***********************************************************************
+# #   The goal of this will be to allow CRUD on table rows from the menu... can I do it based on values dynamically like below or is that
+# #   Too much? If that is too much... can I do it for just full on table row items based on the table name?
 #   class CRUD
+#     # TODO: [] (1 hr) Create the table menu with following options... CRUD By: 1. All records, 2. => n. by column name
+#     # TODO: [] (1 hr) Create the inner table menu for the all...
+#     # TODO: [] (1 hr) Create the inner table menu for column id selectors...
+#     # TODO: [] (1 hr) Create the end of tree CRUD option menu limited by the hash...
+
+#     # **********************Create the table menu CRUD By: 1. All records, 2. => n. by column name**********************************
+#     # Very first menu list could be all the tables... or they have to declare which ones they want to include..
+#     # Would there be a way to just search a "model" folder or the db schema and just auto find all these?
+#     # Using the table name put into the initialize method, find the active record table of same name
+#     # Build an array of the column names:  Model.column_names returns an array of column names as strings
+   
+#     # Do ~menu~.build_menu with menu title as "Crud By" and menu_options as the column names
+
+#     # Have crud_options act as a boolean, default is all, if they put the option in, restricts crud to that thing
+#     def initialize(table_name:, crud_options: {})
+#         # aka inherits all the normal menu stuff?
+#         menu_options = [:all_records, ...table_name.column_names]
+#         super
+#         # Does this assign parents etc. correctly?
+        
+#         # Then all the special initialization stuff lol
+#     end
+    
 #     def self.table_values_menu
 #         # This should retrive the unique values from the table
 #         table_values = [];
