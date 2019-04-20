@@ -2,12 +2,21 @@
 module CliBuilder
 
     #TODO: Fix tests and add more tests (4 hours)
-    #TODO: Refactor main menu area (2 hours), think about private etc
-    #TODO: Build Crud section (8 hours)
+
     #TODO: Add formatting options(title, layouts?), default formatting clears screen (2 hours)
     #TODO: Add readme (2 hours)
     #TODO: Add readme (2 hours)
     #TODO: Fix project organization
+
+    # April 20th, 2019 To Dos
+    #TODO: Refactor main menu area (2 hours)
+        # [] SRP Class Refactor: Ask methods as questions of the class
+        # [] SRP Method Refactor: Ask what the methods responsibilities are - look for and/or
+        # [] Dependency refactor: dependency injection (for class names, class methods and their args), attribute ordering
+        # [] Private vs. public
+    #TODO: Build Crud section (8 hours)
+
+
  
     
     class Menu
@@ -19,6 +28,8 @@ module CliBuilder
         def self.all
             @@all
         end
+
+        # These are potentially private
 
         def self.main_menu
             @@main_menu
@@ -36,11 +47,16 @@ module CliBuilder
             end 
         end
 
-        def initialize(title: 'default menu title', menu_options: [])
+        # Can I dynamically program a method so that its name is dynamic, 
+        # and it takes a send of a menu option and retrieves the actual object
+        # I need the name of the object to be a method that retrieves the object. So what about a method that takes a symbol
+        # and either gets or sends it?
+
+        def initialize(title: 'Default Menu Title', menu_options: [])
             #TODO: Review on the usecase... but this may not be necessary
             self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
-            self.menu_options = menu_options
-            self.assign_parents(self.menu_options)
+            self.menu_options = menu_options         
+            assign_parents(menu_options)
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
             Menu.all << self
@@ -49,6 +65,7 @@ module CliBuilder
 
 # **************************************Menu Print and Build Methods********************************************************************
 
+        # Probably private
         def titlecase(string)
             string.split("_").each {|word| word.capitalize!}.join(" ")
         end
@@ -57,24 +74,36 @@ module CliBuilder
             index + 1
         end
 
+        # public
         def build_menu
-            self.build_menu_title
-            self.build_menu_body
-            self.build_application
+            build_menu_title
+            build_menu_body
+            build_application
         end
 
         def build_menu_title
-            puts "#{titlecase(self.title.to_s)}"
+            puts "#{titlecase(title.to_s)}"
             puts ""
+        end
+
+        # Can I reogranize the code to make these the same?
+        def printMenuTitle
+        end
+
+        def printMethodName
+        end
+
+        def printMenuOption(menu_option, index)
+            if menu_option.class == CliBuilder::Menu
+                puts "#{menu_option_number(index)}. #{titlecase(menu_option.title.to_s)}"
+            else
+                puts "#{menu_option_number(index)}. #{titlecase(menu_option.to_s)}"
+            end
         end
 
         def build_menu_body
             menu_options.each_with_index do |menu_option, index| 
-                if menu_option.class == CliBuilder::Menu
-                    puts "#{menu_option_number(index)}. #{titlecase(menu_option.title.to_s)}"
-                else
-                    puts "#{menu_option_number(index)}. #{titlecase(menu_option.to_s)}"
-                end
+                printMenuOption(menu_option, index)
             end
             #Do not add Back options to main menu (last menu created)
             if self != Menu.main_menu
@@ -101,22 +130,22 @@ module CliBuilder
         end
 
         def execute_application_logic(user_input)
-            self.menu_options.each_with_index do |menu_option, index|
+            menu_options.each_with_index do |menu_option, index|
                 case user_input
-                when self.previous_menu_option
+                when previous_menu_option
                     system "clear" or system "cls"
-                    self.parent.build_menu
-                when self.main_menu_option
+                    parent.build_menu
+                when main_menu_option
                     system "clear" or system "cls"
                     Menu.main_menu.build_menu
-                when self.menu_option_number(index)
+                when menu_option_number(index)
                     if menu_option.class == CliBuilder::Menu
                         system "clear" or system "cls"
                         menu_option.build_menu
                 else
                     system "clear" or system "cls"
                     send(menu_option)
-                    self.build_menu
+                    build_menu
                 end
                 end
             end
@@ -125,7 +154,7 @@ module CliBuilder
         def user_input_validation
                 puts "\n****Error: Please enter a valid number****"
                 puts "\n"
-                self.build_menu
+                build_menu
         end
 
     end
