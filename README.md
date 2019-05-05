@@ -36,9 +36,10 @@ CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_
 
 Menu options can be either method names (as symbols) or references to other CliBuilder::Menu instances. When the option is another menu instance, selecting it in the application will bring the user to that menu. Building off of the previous example, here is what a two menu level application would look like:
 
-sub_menu = CliBuilder::Menu.new(title: "This is the Sub Menu", menu_options: [:sub_menu_option_method_one, :sub_menu_option_method_two, :sub_menu_option_method_three])
 
-main_menu = CliBuilder::Menu.new(title: "This is the Main Menu", menu_options: [sub_menu, :main_menu_option_method_one, :main_menu_option_method_two])
+  sub_menu = CliBuilder::Menu.new(title: "This is the Sub Menu", menu_options: [:sub_menu_option_method_one, :sub_menu_option_method_two, :sub_menu_option_method_three])
+
+  main_menu = CliBuilder::Menu.new(title: "This is the Main Menu", menu_options: [sub_menu, :main_menu_option_method_one, :main_menu_option_method_two])
 
 When CliBuilder::Menu instances are nested within eachother, the last instance to be declared will be the main menu. This final menu is the menu that the application will be built from.
 
