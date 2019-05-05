@@ -14,7 +14,7 @@ module CliBuilder
         # [X] SRP Method Refactor: Ask what the methods responsibilities are - look for and/or
         # [X] Dependency refactor: dependency injection (for [X] class names, [X] class methods and their args), [X]attribute ordering
         # [X] Private vs. public
-    #TODO: Build Crud section (6 hours)
+    #TODO: Build Crud section (10 hours)
     #TODO: Formatting options (3 hours)
         # [] Make sure clear, method results and menu options print out is okay.. do not think it is
         # [] Make placement etc. flexible so they can add titles, adjust placement whatever they want
@@ -196,10 +196,10 @@ module CliBuilder
 # #   The goal of this will be to allow CRUD on table rows from the menu... can I do it based on values dynamically like below or is that
 # #   Too much? If that is too much... can I do it for just full on table row items based on the table name?
 #   class CRUD
-#     # TODO: [] (1 hr) Create the table menu with following options... CRUD By: 1. All records, 2. => n. by column name
-#     # TODO: [] (1 hr) Create the inner table menu for the all...
-#     # TODO: [] (1 hr) Create the inner table menu for column id selectors...
-#     # TODO: [] (1 hr) Create the end of tree CRUD option menu limited by the hash...
+#     # TODO: [] (2 hr) Create the table menu with following options... CRUD By: 1. All records, 2. => n. by column name
+#     # TODO: [] (2 hr) Create the inner table menu for the all...
+#     # TODO: [] (4 hr) Create the inner table menu for column id selectors...
+#     # TODO: [] (8 hr) Create the end of tree CRUD option menu limited by the hash...
 
 #     # **********************Create the table menu CRUD By: 1. All records, 2. => n. by column name**********************************
 #     # Very first menu list could be all the tables... or they have to declare which ones they want to include..
