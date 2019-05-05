@@ -29,17 +29,18 @@ A new "men" is created as by instantiating a new CliBuilder::Menu instance and p
 For example, imagine you have a one level menu. You would like this menu to be able to run three different methods based on the users selection. The method names are menu_option_method_one, menu_option_method_two, and menu_option_method_three. The menu object would be instantiated as follows:
 
 ```ruby
-CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_method_one, :menu_option_method_two, :menu_option_method_three])
+example_menu = CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_method_one, :menu_option_method_two, :menu_option_method_three])
 ```
 
 ### Nest menus and methods to create a full application
 
 Menu options can be either method names (as symbols) or references to other CliBuilder::Menu instances. When the option is another menu instance, selecting it in the application will bring the user to that menu. Building off of the previous example, here is what a two menu level application would look like:
 
-
+```ruby
   sub_menu = CliBuilder::Menu.new(title: "This is the Sub Menu", menu_options: [:sub_menu_option_method_one, :sub_menu_option_method_two, :sub_menu_option_method_three])
 
   main_menu = CliBuilder::Menu.new(title: "This is the Main Menu", menu_options: [sub_menu, :main_menu_option_method_one, :main_menu_option_method_two])
+  ```
 
 When CliBuilder::Menu instances are nested within eachother, the last instance to be declared will be the main menu. This final menu is the menu that the application will be built from.
 
@@ -47,11 +48,13 @@ When CliBuilder::Menu instances are nested within eachother, the last instance t
 
 To build the application, call the build_menu method on the main menu. Continuing with the previous example, to run the application and build the menu out the full code would be:
 
+```ruby
 sub_menu = CliBuilder::Menu.new(title: "This is the Sub Menu", menu_options: [:sub_menu_option_method_one, :sub_menu_option_method_two, :sub_menu_option_method_three])
 
 main_menu = CliBuilder::Menu.new(title: "This is the Main Menu", menu_options: [sub_menu, :main_menu_option_method_one, :main_menu_option_method_two])
 
 main_menu.build_menu
+  ```
 
 ## Development
 
