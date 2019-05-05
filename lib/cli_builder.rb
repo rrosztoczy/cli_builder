@@ -1,6 +1,6 @@
 require "cli_builder/version"
 
 module CliBuilder
-  class Error < StandardError; end
+  require 'cli_builder/menu'
 
 end

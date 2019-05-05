@@ -1,4 +1,8 @@
 module CliBuilder
+    # TODO: [] - Organize files appropriately
+    # TODO: [] - Review tests and test organization
+    # TODO: [] - Write readme
+    # TODO: [] - Get code review
 
     class Menu
         attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option

@@ -1,15 +1,13 @@
-# Clibuilder
+# CliBuilder
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/clibuilder`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+CliBuilder provides tools to help you build CLI menu based applications quickly. The CliBuilder::Menu class gives you the ability to create full menu interfaces and the underlying functionality with a few simple arguments. All you have to do is decide on your menu structure and the methods you would like to run. 
 
 ## Installation
 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'clibuilder'
+gem 'cli_builder'
 ```
 
 And then execute:
@@ -18,11 +16,25 @@ And then execute:
 
 Or install it yourself as:
 
-    $ gem install clibuilder
+    $ gem install cli_builder
 
 ## Usage
 
-TODO: Write usage instructions here
+After installing and requiring the gem, to use CliBuilder::Menu all you need to do is determine your menu tree and write the methods you would like the menus to implement. 
+
+A new "men" is created as by instantiating a new CliBuilder::Menu instance and passing it the menu title as a string and the menu options as an array of symbols. These menu options should either be symbols (that correspond exactly to the names of the method you would like the application to run) or they should be references to other CliBuilder::Menu instances.
+
+For example, imagine you have a one level menu. You would like this menu to be able to run three different methods based on the users selection. The method names are menu_option_method_one, menu_option_method_two, and menu_option_method_three. The menu object would be instantiated as follows:
+
+CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_method_one, :menu_option_method_two, :menu_option_method_three])
+
+Menu options can be either method names (as symbols) or references to other CliBuilder::Menu instances. When the option is another menu instance, selecting it in the application will bring the user to that menu. Building off of the previous example, here is what a two menu level application would look like:
+
+CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_method_one, :menu_option_method_two, :menu_option_method_three])
+When CliBuilder::Menu instances are nested within eachother, the last instance to be declared will be the main menu. This final menu is the menu that the application will be built from.
+
+Example menu tree:
+CliBuilder::Menu.new(title: "your title as string", menu_options: [:sub_test_option_one, :sub_test_option_two, :sub_test_option_three])
 
 ## Development
 
