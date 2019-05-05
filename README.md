@@ -36,7 +36,7 @@ example_menu = CliBuilder::Menu.new(title: "your title as string",
 ```
 ### Build the application
 
-Once the menu instance is written, you call the build_menu method on the instance to create the application interface. Expanding on the previous example,we would write the following code:
+Once the menu instance is written, you call the build_menu method on the instance to create the application interface. Expanding on the previous example, we would write the following code:
 
 ```ruby
 example_menu.build_menu
@@ -67,28 +67,28 @@ example_menu.build_menu
 
 When our application file is run, the output in the terminal would look as follows:
 
-*Your Title As String
-
-1. Menu Option Method One
-2. Menu Option Method Two
-3. Menu Option Method Three
-
-Please enter your selection:*
-
-If the user enters 1:
-
-*You selected the first option
 Your Title As String
 
 1. Menu Option Method One
 2. Menu Option Method Two
 3. Menu Option Method Three
 
-Please enter your selection:*
+Please enter your selection:
+
+...and if the user enters 1:
+
+You selected the first option
+Your Title As String
+
+1. Menu Option Method One
+2. Menu Option Method Two
+3. Menu Option Method Three
+
+Please enter your selection:
 
 ### Nest menus and methods to create a full application
 
-Menu options can be method names (as symbols) or references to other CliBuilder::Menu instances. When the option is another menu instance,selecting it in the application will bring the user to that menu. Building off of the previous example, here is what a two menu level application would look like:
+Menu options can be method names (as symbols) or references to other CliBuilder::Menu instances. When the option is another menu instance, selecting it in the application will bring the user to that menu. Building off of the previous example, here is what a two menu level application would look like:
 
 ```ruby
 sub_menu = CliBuilder::Menu.new(
@@ -102,7 +102,7 @@ main_menu = CliBuilder::Menu.new(
 )
 ```
 
-When CliBuilder::Menu instances are nested within one another, the last instance to be declared will be the main menu. This final menu is the menu that the application will be built from.
+When CliBuilder::Menu instances are nested within one another, the last instance to be declared will be the main menu. This final menu is the menu that the application should be built from.
 
 ### Build the application
 
