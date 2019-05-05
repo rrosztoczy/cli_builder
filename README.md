@@ -28,7 +28,9 @@ A new "men" is created as by instantiating a new CliBuilder::Menu instance and p
 
 For example, imagine you have a one level menu. You would like this menu to be able to run three different methods based on the users selection. The method names are menu_option_method_one, menu_option_method_two, and menu_option_method_three. The menu object would be instantiated as follows:
 
+```ruby
 CliBuilder::Menu.new(title: "your title as string", menu_options: [:menu_option_method_one, :menu_option_method_two, :menu_option_method_three])
+```
 
 ### Nest menus and methods to create a full application
 
