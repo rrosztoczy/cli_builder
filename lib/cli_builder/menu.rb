@@ -28,7 +28,7 @@ module CliBuilder
             self.class.main_menu = self
         end
 
-# **************************************Menu Print and Build Methods********************************************************************
+# **************************************Menu Print and Build Methods**********************************************
 
         def build_menu
             build_menu_title
@@ -41,17 +41,17 @@ module CliBuilder
             puts ""
         end
 
-            def build_menu_body
-                menu_options.each_with_index do |menu_option, index| 
-                    printMenuOption(menu_option: menu_option, index: index)
-                end
+        def build_menu_body
+            menu_options.each_with_index do |menu_option, index| 
+                printMenuOption(menu_option: menu_option, index: index)
+            end
 
-                #Do not add Back options to main menu
-                if self != self.class.main_menu
-                    printPreviousMenuOption
-                    printMainMenuOption
-                end
-                printPrompt
+            #Do not add Back options to main menu
+            if self != self.class.main_menu
+                printPreviousMenuOption
+                printMainMenuOption
+            end
+            printPrompt
         end
         
 
@@ -130,10 +130,6 @@ module CliBuilder
             build_menu
         end
 
-    # Come back to this after crud to see if you can make an improved send
-    # Can I reogranize the code to make these the same?
-    # I need the name of the object to be a method that retrieves the object. So what about a method that takes a symbol
-    # and either gets or sends it?
         def call_menu_option(menu_option)
             if menu_option.class == self.class
                 menu_option.build_menu
