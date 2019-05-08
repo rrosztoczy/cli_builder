@@ -1,10 +1,15 @@
+require "sinatra"
+require "active_record"
+require "sinatra/activerecord"
+
 module CliBuilder
-    # TODO: [] - Organize files appropriately
+    # TODO: [X] - Organize files appropriately
     # TODO: [] - Review tests and test organization
-    # TODO: [] - Write readme
+    # TODO: [X] - Write readme
     # TODO: [] - Get code review
 
-    class Menu
+    class Menu < ActiveRecord::Base
+        # If -- include CRUD, then extend Crud Module
         attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option
         @@all = [];
         @@main_menu = {};
@@ -159,6 +164,66 @@ module CliBuilder
             end
         end
     end
+           
+
+    ###Include CRUD class
+class Crud < Menu
+
+# TODO: for each model do...
+# [] - Build menu of model name with menu options view, create, update, delete
+#       To do this, I actually need to build out the menus in reverse order I believe lol... which is kind of a bitch... would be nicer 
+#       If each menu item was actually a method firing that queried active record and then build a menu... woop!
+#       So... need the model name menus to be methods (yay dynamic method naming..)
+#       Step one... how do I pull all of the model names into an array?
+    @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" || "ar_internal_metadata"}
+    def self.get_tables
+        puts @@tables
+    end
+    #     ride_type_array = ["UberX & lyft", "UberXL & lyft_plus",
+    def self.write_table_menus
+    ride_type_array.each_with_index do |mapped_product_type, index|
+    #       define_method :"#{mapped_product_type}" do
+    end
+
+
+# [] - View, update delete are each menus that lead to another menu: this one is all, or by table header 
+# [] - All leads to a menu where menu options are all recrods in that table, others lead to menu with only those options
+# [] - From there, the ids trigger either a where, update, or destroy method on taht record
+# [] - That method will be denamically named as the record id, so that entering it triggers it
+    
 end
+end
+end
+
+#We could make this more extensible by mapping product types in the db and building the array from the db...
+# def self.ride_by_type_menu
+#     ride_type_array = ["UberX & lyft", "UberXL & lyft_plus", "Black & lyft_lux", "Black SUV & lyft_luxsuv", "UberPool & lyft_line"]
+  
+#     #Dynamically defines methods for the application builder using the product types
+#     ride_type_array.each_with_index do |mapped_product_type, index|
+#       define_method :"#{mapped_product_type}" do
+  
+#         #breaks apart product types to access appropriate db values
+#         uber = mapped_product_type.split(" & ")[0]
+#         lyft = mapped_product_type.split(" & ")[1]
+#         uber_rides_arr = Ride.where(product_type: "#{uber}")
+#         lyft_rides_arr = Ride.where(product_type: "#{lyft}")
+  
+#         #formats and puts out ride data
+#         puts "Ride prices by product type:"
+#         puts "\n"
+#         rides_arr = (uber_rides_arr + lyft_rides_arr).sort_by {|ride| ride.name}
+#         rides_arr.each do |ride|
+#           puts "#{ride.name.ljust(40)} #{ride.product_type.ljust(12)} avg $#{ride.avg_estimate.to_s.ljust(12)} est #{ride.estimate.ljust(12)} #{ride.created_at}"
+#         end
+#         puts "\n"
+#         ride_menu
+#       end
+#     end
+  
+#     #Builds dynamic application menu and functionality from product definitions
+#     application_builder("Find Ride Data by Type", ride_type_array)
+#   end
+  
 
 
