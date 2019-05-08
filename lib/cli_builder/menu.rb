@@ -8,7 +8,7 @@ module CliBuilder
     # TODO: [X] - Write readme
     # TODO: [] - Get code review
 
-    class Menu < ActiveRecord::Base
+    class Menu
         # If -- include CRUD, then extend Crud Module
         attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option
         @@all = [];
@@ -34,7 +34,7 @@ module CliBuilder
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
             self.class.all << self
-            self.class.main_menu = self
+            self.class.main_menu = self 
         end
 
 # **************************************Menu Print and Build Methods**********************************************
@@ -46,7 +46,7 @@ module CliBuilder
         end
 
         def build_menu_title
-            puts "#{titlecase(title.to_s)}"
+            puts "#{Menu.titlecase(title.to_s)}"
             puts ""
         end
 
@@ -113,11 +113,11 @@ module CliBuilder
         end
 
         def printMenuTitle(menu_option:, index:)
-            puts "#{menu_option_number(index)}. #{titlecase(menu_option.title.to_s)}"
+            puts "#{menu_option_number(index)}. #{Menu.titlecase(menu_option.title.to_s)}"
         end
 
         def printMethodName(menu_option:, index:)
-            puts "#{menu_option_number(index)}. #{titlecase(menu_option.to_s)}"
+            puts "#{menu_option_number(index)}. #{Menu.titlecase(menu_option.to_s)}"
         end
 
         def printInputValidation
@@ -138,6 +138,11 @@ module CliBuilder
             printInputValidation
             build_menu
         end
+
+        # TODO: Don't like this here... need a better way of integrating the CRUD functionality
+        def crud_menu
+            CliBuilder::Crud.build_model_menu
+          end
 
         def call_menu_option(menu_option)
             if menu_option.class == self.class
@@ -164,7 +169,8 @@ module CliBuilder
             end
         end
     end
-           
+        #    Other major to do = have the menus build off of files with _menu.rb at the end, pull methods from that somehow... need 
+        # To know which methods to grab
 
     ###Include CRUD class
     class Crud < CliBuilder::Menu
@@ -176,17 +182,110 @@ module CliBuilder
         #       So... need the model name menus to be methods (yay dynamic method naming..)
         #       Step one... how do I pull all of the model names into an array?
             @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" && table != "ar_internal_metadata"}
-            @@tables_as_titles = @@tables.map{ |table| titlecase(table)}
+            @@selected_table
+            @@crud_type
             def self.get_tables
                 puts @@tables
-                puts @@tables_as_titles
             end
-            #     ride_type_array = ["UberX & lyft", "UberXL & lyft_plus",
-            # def self.write_table_menus
-            # ride_type_array.each_with_index do |mapped_product_type, index|
-            # #       define_method :"#{mapped_product_type}" do
-            # end
-        
+
+            def initialize(title: 'Default Menu Title', menu_options: [])
+                self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
+                self.menu_options = menu_options         
+                self.parent = Menu.main_menu
+                self.previous_menu_option = menu_options.length + 1
+                self.main_menu_option = menu_options.length + 2
+                # CliBuilder::Menu.class.all << self
+            end
+
+            def self.build_crud_options_menu
+                crud_options = [:view, :create, :update, :destroy]
+                @column_names = []
+                # Next, need to write the actual methods for view, create, update and destroy since these will get sent.
+                # This will simply set the crud type and then build a menu crud by:
+                crud_options.each do |crud_method|
+                    puts "About to defined #{crud_method} as #{crud_method.class}"
+                    define_singleton_method :"#{crud_method}" do
+                        @@crud_type = crud_method
+                        crud_by_menu = CliBuilder::Crud.new(title: "CRUD By Menu", menu_options: [:all, @column_names])
+                        crud_by_menu.build_menu
+                        crud_by_menu.each do |column_name|
+                            define_singleton_method :"#{column_name}" do
+                                # here build out another menu of unique values for that table
+                                #after that... thene do the crud
+                                puts "You selected #{column_name}! The current table is #{@@selected_table} and the current crud type is #{@@crud_type}"
+                            end
+                        end
+                        # build_crud_options_menu
+                        # TODO: this should be the actual method. So... this should store the table that was selected amd bring up the crud menu....
+                    end
+                end
+                crud_options_menu = CliBuilder::Crud.new(title: "CRUD Options Menu", menu_options: crud_options)
+                crud_options_menu.build_menu
+                # puts "#
+            end
+
+
+            # Ulitmately, at the moment I have to include method that calls this on CliBuilder:Crud above the build_menu line.
+            # What I really want is for it to all happen automatically if the user selectes --CRUD... so many this crud thing should 
+            # Include it auto and overwrite if included
+            def self.build_model_menu
+            @methods = []
+                @@tables.each_with_index do |item, index|
+                    puts "about to define #{item}"
+                    define_singleton_method :"#{item}" do
+                        puts Crud.titlecase(item)
+                        @@selected_table = item
+                        puts "About to build crud options menu"
+                        Crud.build_crud_options_menu
+                        # TODO: this should be the actual method. So... this should store the table that was selected amd bring up the crud menu....
+                    end
+                    puts "#{item} is a method"
+                    puts "#{item.class} is its class"
+                    Crud.send(item.to_sym)
+                    @methods.push(item.to_sym)
+                    puts @methods
+                end
+                model_menu = CliBuilder::Crud.new(title: "CRUD Menu", menu_options: @methods)
+                puts model_menu.class
+                model_menu.build_menu
+            end
+
+            def call_menu_option(menu_option)
+                if menu_option.class == self.class
+                    menu_option.build_menu
+                elsif self.class == CliBuilder::Crud
+                    Crud.send(menu_option.to_sym)
+                    build_menu
+                else
+                    send(menu_option)
+                    build_menu
+                end
+            end
+
+
+
+  
+  
+        # def execute_application_logic(user_input)
+        #     menu_options.each_with_index do |menu_option, index|
+        #         case user_input
+        #         when previous_menu_option
+        #             system "clear" or system "cls"
+        #             parent.build_menu
+        #         when main_menu_option
+        #             system "clear" or system "cls"
+        #             self.class.main_menu.build_menu
+        #         when menu_option_number(index)
+        #             system "clear" or system "cls"
+        #             call_menu_option(menu_option)
+        #         end
+        #     end
+        # end
+            
+
+            # So I have a menu with the tables...
+            # Now when I fire that menu, I want to see one with crud options
+            # I need to get and keep which table was selected in a variable somewhere so that I can crud on the appropriate table
         
         # [] - View, update delete are each menus that lead to another menu: this one is all, or by table header 
         # [] - All leads to a menu where menu options are all recrods in that table, others lead to menu with only those options
