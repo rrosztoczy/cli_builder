@@ -74,7 +74,7 @@ module CliBuilder
         end
 
         private
-        def titlecase(string)
+        def self.titlecase(string)
             string.split("_").each {|word| word.capitalize!}.join(" ")
         end
 
@@ -167,32 +167,33 @@ module CliBuilder
            
 
     ###Include CRUD class
-class Crud < Menu
+    class Crud < CliBuilder::Menu
 
-# TODO: for each model do...
-# [] - Build menu of model name with menu options view, create, update, delete
-#       To do this, I actually need to build out the menus in reverse order I believe lol... which is kind of a bitch... would be nicer 
-#       If each menu item was actually a method firing that queried active record and then build a menu... woop!
-#       So... need the model name menus to be methods (yay dynamic method naming..)
-#       Step one... how do I pull all of the model names into an array?
-    @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" || "ar_internal_metadata"}
-    def self.get_tables
-        puts @@tables
-    end
-    #     ride_type_array = ["UberX & lyft", "UberXL & lyft_plus",
-    def self.write_table_menus
-    ride_type_array.each_with_index do |mapped_product_type, index|
-    #       define_method :"#{mapped_product_type}" do
-    end
-
-
-# [] - View, update delete are each menus that lead to another menu: this one is all, or by table header 
-# [] - All leads to a menu where menu options are all recrods in that table, others lead to menu with only those options
-# [] - From there, the ids trigger either a where, update, or destroy method on taht record
-# [] - That method will be denamically named as the record id, so that entering it triggers it
-    
-end
-end
+        # TODO: for each model do...
+        # [] - Build menu of model name with menu options view, create, update, delete
+        #       To do this, I actually need to build out the menus in reverse order I believe lol... which is kind of a bitch... would be nicer 
+        #       If each menu item was actually a method firing that queried active record and then build a menu... woop!
+        #       So... need the model name menus to be methods (yay dynamic method naming..)
+        #       Step one... how do I pull all of the model names into an array?
+            @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" && table != "ar_internal_metadata"}
+            @@tables_as_titles = @@tables.map{ |table| titlecase(table)}
+            def self.get_tables
+                puts @@tables
+                puts @@tables_as_titles
+            end
+            #     ride_type_array = ["UberX & lyft", "UberXL & lyft_plus",
+            # def self.write_table_menus
+            # ride_type_array.each_with_index do |mapped_product_type, index|
+            # #       define_method :"#{mapped_product_type}" do
+            # end
+        
+        
+        # [] - View, update delete are each menus that lead to another menu: this one is all, or by table header 
+        # [] - All leads to a menu where menu options are all recrods in that table, others lead to menu with only those options
+        # [] - From there, the ids trigger either a where, update, or destroy method on taht record
+        # [] - That method will be denamically named as the record id, so that entering it triggers it
+            
+        end
 end
 
 #We could make this more extensible by mapping product types in the db and building the array from the db...
