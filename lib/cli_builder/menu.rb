@@ -199,6 +199,7 @@ module CliBuilder
             ##BUG! Previous Menu taks you back to main menu from crud menus
 
             def self.build_crud_options_menu
+                puts "WHOOPS"
                 crud_options = [:view, :create, :update, :destroy]
                 @column_names = self.modelcase(@@selected_table).constantize.columns.map(&:name)
                 puts "these are the column names! #{@column_names}"
@@ -213,13 +214,34 @@ module CliBuilder
                         @crud_by_options.each do |column_name|
                             puts "About to defined #{column_name} as #{column_name.class}"
                             define_singleton_method :"#{column_name}" do
-                                @selected_column = "lat"
+                                @selected_column = column_name
                                 # Next step... populate selected column approp... make sure selected table and selected crud type stay good
                                 @column_values = self.modelcase(@@selected_table).constantize.distinct.pluck(@selected_column)
-                                @crud_by_value_options = [:all, @column_values]
-                                @crud_by_value_options.each do |column_value|
+                                @column_values.each do |column_value|
+                                    @records = self.modelcase(@@selected_table).constantize.where("#{@selected_column}=?", column_value).to_a
+                                    puts "records are #{@records}"
                                     define_singleton_method :"#{column_value}" do
                                         puts "column value is #{column_value}"
+                                        @selected_value = column_value
+                                    
+                                        @records.each do |record|
+                                            puts "#{record.attributes}"
+                                            # Should probably make the menu items be the above ^
+                                            puts "#{record.attributes.values}"
+                                            define_singleton_method :"#{record}" do
+                                                 # For view, find_by(@selected_column === @selected_value)
+                                                 puts "#{self.modelcase(@@selected_table).constantize.find(record.id)}"
+
+                                            end
+                                            # record.crudtype?
+                                           
+                                        end
+                                        crud_by_record_menu = CliBuilder::Crud.new(title: "#{@@crud_type.to_s}", menu_options: @records)
+                                        crud_by_record_menu.build_menu
+                                        # What do Iant to do here? Bring up all records that have that value?
+                                        # When they enter a selection, I want to see all records of that type
+                                        # When they enter that selection, I want to execute the actual crud using @crud_method, @table, @column name, etc.
+                                        # Or maybe just the id
                                     end
                                 end
                                 crud_by_value_menu = CliBuilder::Crud.new(title: "CRUD By Value Menu", menu_options: [:all].concat(@column_values))
@@ -251,12 +273,13 @@ module CliBuilder
                         puts Crud.titlecase(item)
                         @@selected_table = item
                         puts "About to build crud options menu"
+                        # TODO: This is in the wrong place, should see a table menu
                         Crud.build_crud_options_menu
                         # TODO: this should be the actual method. So... this should store the table that was selected amd bring up the crud menu....
+                        puts "#{item} is a method"
+                        puts "#{item.class} is its class"
+                        # Crud.send(item.to_sym)
                     end
-                    puts "#{item} is a method"
-                    puts "#{item.class} is its class"
-                    Crud.send(item.to_sym)
                     @methods.push(item.to_sym)
                     puts @methods
                 end
@@ -266,7 +289,7 @@ module CliBuilder
             end
 
             def call_menu_option(menu_option)
-                if menu_option.class == self.class
+                if menu_option.class == CliBuilder::Menu
                     menu_option.build_menu
                 elsif self.class == CliBuilder::Crud
                     Crud.send(menu_option.to_sym)
