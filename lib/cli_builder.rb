@@ -1,8 +1,8 @@
-require "cli_builder/version"
+require_relative "./cli_builder/version.rb"
 
 module CliBuilder
-  require 'cli_builder/menu'
-  require 'cli_builder/crud'
+  require_relative './cli_builder/menu.rb'
+  require_relative './cli_builder/crud.rb'
 
   def printInputValidation
     puts "\n****Error: Please enter a valid number****"
@@ -12,7 +12,7 @@ end
   def user_input_validation
     system "clear" or system "cls"
     printInputValidation
-    build_menu
+    Menu.build_menu
 end
 
   def get_user_input
@@ -27,10 +27,12 @@ def call_menu_option(menu_option)
       menu_option.build_menu
   elsif self.class == CliBuilder::Crud
       Crud.send(menu_option.to_sym)
-      build_menu
+      Menu.build_menu
+  elsif menu_option === :crud_menu
+      Crud.build_model_menu
   else
       send(menu_option)
-      build_menu
+      Menu.build_menu
   end
 end
 

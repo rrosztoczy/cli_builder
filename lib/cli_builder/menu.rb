@@ -1,7 +1,7 @@
 require "sinatra"
 require "active_record"
 require "sinatra/activerecord"
-require "../cli_builder.rb"
+# require "../cli_builder.rb"
 
 
 module CliBuilder
@@ -142,10 +142,14 @@ module CliBuilder
         end
 
         # TODO: Pull into CLI Builder
-
         def call_menu_option(menu_option)
-            if menu_option.class == self.class
+            if menu_option.class == CliBuilder::Menu
                 menu_option.build_menu
+            elsif self.class == CliBuilder::Crud
+                Crud.send(menu_option.to_sym)
+                build_menu
+            elsif menu_option === :crud_menu
+                Crud.build_model_menu
             else
                 send(menu_option)
                 build_menu
