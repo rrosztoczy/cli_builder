@@ -36,18 +36,43 @@ module CliBuilder
             self.modelcase(table).constantize
         end
 
+        def self.write_record_method(record)
+            define_singleton_method :"#{record}" do
+                # For view, find_by(@selected_column === @selected_value)
+                puts "#{@@selected_table.find(record.id)}"
+           end
+        end
+
+        def self.build_records_menu(crud_type, records)
+            crud_by_record_menu = CliBuilder::Crud.new(title: "#{crud_type.to_s}", menu_options: records)
+            crud_by_record_menu.build_menu
+        end
+
+        def self.build_columns_menu(column_names)
+            crud_by_menu = CliBuilder::Crud.new(title: "CRUD By Menu", menu_options: [:all].concat(column_names))
+            crud_by_menu.build_menu
+        end
+
+        def self.build_crud_type_menu(crud_types)
+            crud_types_menu = CliBuilder::Crud.new(title: "CRUD Types Menu", menu_options: crud_types)
+            crud_types_menu.build_menu
+        end
+
+        def self.build_crud_by_value_menu(column_values)
+            crud_by_value_menu = CliBuilder::Crud.new(title: "CRUD By Value Menu", menu_options: [:all].concat(column_values))
+            crud_by_value_menu.build_menu
+        end
+
         def self.write_crud_method(crud_type, column_names)
             define_singleton_method :"#{crud_type}" do
-                @@crud_type = crud_type
-                # this variable should be like crud_by_options
                 @crud_by_options = [:all].concat(column_names)
                 @crud_by_options.each do |column_name|
                     puts "About to defined#{column_name} as #{column_name.class}"
                     define_singleton_method :"#{column_name}" do
                         @selected_column = column_name
                         # Next step... populate selected column approp... make sure selected table and selected crud type stay good
-                        @column_values = @@selected_table.distinct.pluck(@selected_column)
-                        @column_values.each do |column_value|
+                        column_values = @@selected_table.distinct.pluck(@selected_column)
+                        column_values.each do |column_value|
                             # It looks like all option does not work with below statement... if column_value = all... do an all statement
                             if @selected_column === :all
                                 @records = @@selected_table.find_each.to_a
@@ -63,46 +88,36 @@ module CliBuilder
                                     puts "#{record.attributes}"
                                     # Should probably make the menu items be the above ^
                                     puts "#{record.attributes.values}"
-                                    define_singleton_method :"#{record}" do
-                                         # For view, find_by(@selected_column === @selected_value)
-                                         puts "#{@@selected_table.find(record.id)}"
-
-                                    end
+                                    write_record_method(record)
                                     # record.crudtype?
                                    
                                 end
-                                crud_by_record_menu = CliBuilder::Crud.new(title: "#{@@crud_type.to_s}", menu_options: @records)
-                                crud_by_record_menu.build_menu
+                                build_records_menu(crud_type, @records)
                                 # What do Iant to do here? Bring up all records that have that value?
                                 # When they enter a selection, I want to see all records of that type
                                 # When they enter that selection, I want to execute the actual crud using @crud_method, @table, @column name, etc.
                                 # Or maybe just the id
                             end
                         end
-                        crud_by_value_menu = CliBuilder::Crud.new(title: "CRUD By Value Menu", menu_options: [:all].concat(@column_values))
-                        crud_by_value_menu.build_menu
+                        self.build_crud_by_value_menu(column_values)
                         # These methods should essentially bring up a list of menu options that represents the values in that list
                         # TODO: use @column_values and @selected column to.... create a menu of the unique values
-                        puts "You selected #{column_name}! The current table is #{@@selected_table} and the current crud type is #{@@crud_type}"
+                        puts "You selected #{column_name}! The current table is #{@@selected_table} and the current crud type is #{crud_type}"
                     end
                 end
-                crud_by_menu = CliBuilder::Crud.new(title: "CRUD By Menu", menu_options: [:all].concat(column_names))
-                crud_by_menu.build_menu
+                build_columns_menu(column_names)
 
             end
 
         end
 
-        def self.build_crud_type_menu
-            crud_options = [:view, :create, :update, :destroy]
+        def self.create_crud_type_menu
+            crud_types = [:view, :create, :update, :destroy]
             column_names = @@selected_table.columns.map(&:name)
-            crud_options.each do |crud_method|
-                puts "About to define #{crud_method} as #{crud_method.class}"
+            crud_types.each do |crud_method|
                 write_crud_method(crud_method, column_names)
-                            end
-            crud_options_menu = CliBuilder::Crud.new(title: "CRUD Options Menu", menu_options: crud_options)
-            crud_options_menu.build_menu
-            # puts "#
+            end
+            build_crud_type_menu(crud_types)
         end
 
 
@@ -120,7 +135,7 @@ module CliBuilder
                     @@selected_table = to_table_format(item)
                     puts "About to build crud options menu"
                     # TODO: This is in the wrong place, should see a table menu
-                    Crud.build_crud_type_menu
+                    Crud.create_crud_type_menu
                     # TODO: this should be the actual method. So... this should store the table that was selected amd bring up the crud menu....
                     puts "#{item} is a method"
                     puts "#{item.class} is its class"
