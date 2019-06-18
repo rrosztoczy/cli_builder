@@ -27,33 +27,38 @@ module CliBuilder
             # CliBuilder::Menu.class.all << self
         end
 
-        ##BUG! Previous Menu taks you back to main menu from crud menus
-
         def crud_menu
             self.build_model_menu
         end
 
-        def self.build_crud_options_menu
-            puts "WHOOPS"
+        # Add a formatting file for this method, modelcase from menu, etc
+        def self.to_table_format(table)
+            self.modelcase(table).constantize
+        end
+
+        def self.build_crud_type_menu
             crud_options = [:view, :create, :update, :destroy]
-            @column_names = self.modelcase(@@selected_table).constantize.columns.map(&:name)
-            puts "these are the column names! #{@column_names}"
-            # Next, need to write the actual methods for view, create, update and destroy since these will get sent.
-            # This will simply set the crud type and then build a menu crud by:
+            @column_names = @@selected_table.columns.map(&:name)
+            # puts "these are the column names! #{@column_names}"
             crud_options.each do |crud_method|
-                puts "About to defined #{crud_method} as #{crud_method.class}"
+                puts "About to define #{crud_method} as #{crud_method.class}"
                 define_singleton_method :"#{crud_method}" do
                     @@crud_type = crud_method
                     # this variable should be like crud_by_options
                     @crud_by_options = [:all].concat(@column_names)
                     @crud_by_options.each do |column_name|
-                        puts "About to defined #{column_name} as #{column_name.class}"
+                        puts "About to defined#{column_name} as #{column_name.class}"
                         define_singleton_method :"#{column_name}" do
                             @selected_column = column_name
                             # Next step... populate selected column approp... make sure selected table and selected crud type stay good
-                            @column_values = self.modelcase(@@selected_table).constantize.distinct.pluck(@selected_column)
+                            @column_values = @@selected_table.distinct.pluck(@selected_column)
                             @column_values.each do |column_value|
-                                @records = self.modelcase(@@selected_table).constantize.where("#{@selected_column}=?", column_value).to_a
+                                # It looks like all option does not work with below statement... if column_value = all... do an all statement
+                                if @selected_column === :all
+                                    @records = @@selected_table.find_each.to_a
+                                else
+                                    @records = @@selected_table.where("#{@selected_column}=?", column_value).to_a
+                                end
                                 puts "records are #{@records}"
                                 define_singleton_method :"#{column_value}" do
                                     puts "column value is #{column_value}"
@@ -65,7 +70,7 @@ module CliBuilder
                                         puts "#{record.attributes.values}"
                                         define_singleton_method :"#{record}" do
                                              # For view, find_by(@selected_column === @selected_value)
-                                             puts "#{self.modelcase(@@selected_table).constantize.find(record.id)}"
+                                             puts "#{@@selected_table.find(record.id)}"
 
                                         end
                                         # record.crudtype?
@@ -100,16 +105,18 @@ module CliBuilder
         # Ulitmately, at the moment I have to include method that calls this on CliBuilder:Crud above the build_menu line.
         # What I really want is for it to all happen automatically if the user selectes --CRUD... so many this crud thing should 
         # Include it auto and overwrite if included
+    
+
         def self.build_model_menu
         @methods = []
             @@tables.each_with_index do |item, index|
                 puts "about to define #{item}"
                 define_singleton_method :"#{item}" do
                     puts Crud.titlecase(item)
-                    @@selected_table = item
+                    @@selected_table = to_table_format(item)
                     puts "About to build crud options menu"
                     # TODO: This is in the wrong place, should see a table menu
-                    Crud.build_crud_options_menu
+                    Crud.build_crud_type_menu
                     # TODO: this should be the actual method. So... this should store the table that was selected amd bring up the crud menu....
                     puts "#{item} is a method"
                     puts "#{item.class} is its class"
