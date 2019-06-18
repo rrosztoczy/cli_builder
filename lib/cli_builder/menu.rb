@@ -1,9 +1,10 @@
-module CliBuilder
-    # TODO: [] - Organize files appropriately
-    # TODO: [] - Review tests and test organization
-    # TODO: [] - Write readme
-    # TODO: [] - Get code review
+require "sinatra"
+require "active_record"
+require "sinatra/activerecord"
+# require "../cli_builder.rb"
 
+
+module CliBuilder
     class Menu
         attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option
         @@all = [];
@@ -29,7 +30,7 @@ module CliBuilder
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
             self.class.all << self
-            self.class.main_menu = self
+            self.class.main_menu = self 
         end
 
 # **************************************Menu Print and Build Methods**********************************************
@@ -41,7 +42,7 @@ module CliBuilder
         end
 
         def build_menu_title
-            puts "#{titlecase(title.to_s)}"
+            puts "#{Menu.titlecase(title.to_s)}"
             puts ""
         end
 
@@ -69,8 +70,12 @@ module CliBuilder
         end
 
         private
-        def titlecase(string)
+        def self.titlecase(string)
             string.split("_").each {|word| word.capitalize!}.join(" ")
+        end
+
+        def self.modelcase(string)
+            string.split("_").map {|word| word.capitalize!}.join("").chomp("s")
         end
 
         def menu_option_number(index)
@@ -89,10 +94,12 @@ module CliBuilder
             end 
         end
 
+        # Pull into clu_builder ##############
         def get_user_input
             user_input = gets.chomp
             user_input == "exit" ? exit : user_input
         end
+        # ######################
 
         def printPrompt
             puts ""
@@ -108,11 +115,11 @@ module CliBuilder
         end
 
         def printMenuTitle(menu_option:, index:)
-            puts "#{menu_option_number(index)}. #{titlecase(menu_option.title.to_s)}"
+            puts "#{menu_option_number(index)}. #{Menu.titlecase(menu_option.title.to_s)}"
         end
 
         def printMethodName(menu_option:, index:)
-            puts "#{menu_option_number(index)}. #{titlecase(menu_option.to_s)}"
+            puts "#{menu_option_number(index)}. #{Menu.titlecase(menu_option.to_s)}"
         end
 
         def printInputValidation
@@ -134,9 +141,15 @@ module CliBuilder
             build_menu
         end
 
+        # TODO: Pull into CLI Builder
         def call_menu_option(menu_option)
-            if menu_option.class == self.class
+            if menu_option.class == CliBuilder::Menu
                 menu_option.build_menu
+            elsif self.class == CliBuilder::Crud
+                Crud.send(menu_option.to_sym)
+                build_menu
+            elsif menu_option === :crud_menu
+                Crud.build_model_menu
             else
                 send(menu_option)
                 build_menu
@@ -158,7 +171,10 @@ module CliBuilder
                 end
             end
         end
+
+         # ######################
     end
+
 end
 
-
+    
