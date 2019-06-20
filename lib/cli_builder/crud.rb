@@ -49,36 +49,40 @@ module CliBuilder
             crud_menu.build_menu
         end
 
+        def self.write_model_menu_method(crud_type, column_name)
+            define_singleton_method :"#{column_name}" do
+                @selected_column = column_name
+                column_values = @@selected_table.distinct.pluck(@selected_column)
+                column_values.each do |column_value|
+                    if @selected_column === :all
+                        @records = @@selected_table.find_each.to_a
+                    else
+                        @records = @@selected_table.where("#{@selected_column}=?", column_value).to_a
+                    end
+                    puts "records are #{@records}"
+                    define_singleton_method :"#{column_value}" do
+                        puts "column value is #{column_value}"
+                        @selected_value = column_value
+                        @records.each do |record|
+                            puts "#{record.attributes}"
+                            puts "#{record.attributes.values}"
+                            write_record_method(record)
+                            # record.crudtype
+                        end
+                        build_crud_menu("#{crud_type.to_s}", @records)
+                    end
+                end
+                build_crud_menu("Choose Records by Column Value", [:all].concat(column_values))
+            end
+        end
+
+        # Writes method to choose crud type
         def self.write_crud_method(crud_type, column_names)
             define_singleton_method :"#{crud_type}" do
                 @crud_by_options = [:all].concat(column_names)
                 @crud_by_options.each do |column_name|
                     puts "About to defined#{column_name} as #{column_name.class}"
-                    define_singleton_method :"#{column_name}" do
-                        @selected_column = column_name
-                        column_values = @@selected_table.distinct.pluck(@selected_column)
-                        column_values.each do |column_value|
-                            if @selected_column === :all
-                                @records = @@selected_table.find_each.to_a
-                            else
-                                @records = @@selected_table.where("#{@selected_column}=?", column_value).to_a
-                            end
-                            puts "records are #{@records}"
-                            define_singleton_method :"#{column_value}" do
-                                puts "column value is #{column_value}"
-                                @selected_value = column_value
-                                @records.each do |record|
-                                    puts "#{record.attributes}"
-                                    puts "#{record.attributes.values}"
-                                    write_record_method(record)
-                                    # record.crudtype
-                                   
-                                end
-                                build_crud_menu("#{crud_type.to_s}", @records)
-                            end
-                        end
-                        build_crud_menu("Choose Records by Column Value", [:all].concat(column_values))
-                    end
+                    write_model_menu_method(crud_type, column_name)
                 end
                 build_crud_menu("Find Records by Column", [:all].concat(column_names))
 
