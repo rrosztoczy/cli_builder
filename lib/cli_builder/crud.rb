@@ -52,9 +52,15 @@ module CliBuilder
                       # When crud type is update, update the appropriate value for that column/record with the new data
                     # user = User.find_by(name: 'David')
                     # user.update(name: 'Dave')
-                    # record.update("#{column_name}:" new_value)
+                    puts "Choose record column for update: #{record.as_json}"
+                    column_to_update = gets.chomp
+                    puts "Enter new value:"
+                    new_value = gets.chomp
+                    record.update({column_to_update => "#{new_value}"})
+                    puts "Record updated"
                 when :destroy
                     record.destroy
+                    puts "Record deleted"
                 else
                 end
            end
