@@ -41,25 +41,27 @@ module CliBuilder
             crud_menu.build_menu
         end
 
-        def self.write_record_method(crud_type, record, selected_table="")
-            define_singleton_method :"#{record}" do
-                puts "#{selected_table.find(record.id)}"
+        def self.write_record_method(crud_type, records, selected_record, selected_table="")
+            define_singleton_method :"#{selected_record}" do
+                puts "#{selected_table.find(selected_record.id)}"
                 case crud_type
                 when :view
-                    puts "Record information: #{record.as_json}"
+                    puts "Record information: #{selected_record.as_json}"
                 when :update
-                    puts "Record information: #{record.as_json}"
+                    puts "Record information: #{selected_record.as_json}"
                     puts "Please enter a record attribute to update:"
                     column_to_update = gets.chomp
-                    value_before_update = record.column_to_update
+                    value_before_update = selected_record[column_to_update.to_sym]
                     puts "The current value for #{column_to_update} is #{value_before_update}. Please enter the new value:"
                     new_value = gets.chomp
-                    record.update({column_to_update => "#{new_value}"})
+                    selected_record.update({column_to_update => "#{new_value}"})
                     puts "#{column_to_update} has been updated to #{new_value} from #{value_before_update}"
+                    build_crud_menu("#{crud_type.to_s}", records)
                 when :destroy
-                    record.destroy
+                    selected_record.destroy
                     puts "Record deleted"
-                    # TODO: Need to update the recors that show after this
+                    new_records = records.filter {|record| record != selected_record}
+                    build_crud_menu("#{crud_type.to_s}", new_records)
                 else
                 end
            end
@@ -68,7 +70,7 @@ module CliBuilder
         def self.write_crud_by_value(crud_type, column_value, records, selected_table="")
             define_singleton_method :"#{column_value}" do
                 records.each do |record|
-                    write_record_method(crud_type, record, selected_table)
+                    write_record_method(crud_type, records, record, selected_table)
                 end
                 build_crud_menu("#{crud_type.to_s}", records)
             end
