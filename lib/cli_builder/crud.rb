@@ -43,24 +43,23 @@ module CliBuilder
 
         def self.write_record_method(crud_type, record, selected_table="")
             define_singleton_method :"#{record}" do
-                # For view, find_by(@selected_column === @selected_value)
                 puts "#{selected_table.find(record.id)}"
                 case crud_type
                 when :view
                     puts "Record information: #{record.as_json}"
                 when :update
-                      # When crud type is update, update the appropriate value for that column/record with the new data
-                    # user = User.find_by(name: 'David')
-                    # user.update(name: 'Dave')
-                    puts "Choose record column for update: #{record.as_json}"
+                    puts "Record information: #{record.as_json}"
+                    puts "Please enter a record attribute to update:"
                     column_to_update = gets.chomp
-                    puts "Enter new value:"
+                    value_before_update = record.column_to_update
+                    puts "The current value for #{column_to_update} is #{value_before_update}. Please enter the new value:"
                     new_value = gets.chomp
                     record.update({column_to_update => "#{new_value}"})
-                    puts "Record updated"
+                    puts "#{column_to_update} has been updated to #{new_value} from #{value_before_update}"
                 when :destroy
                     record.destroy
                     puts "Record deleted"
+                    # TODO: Need to update the recors that show after this
                 else
                 end
            end
