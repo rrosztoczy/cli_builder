@@ -51,17 +51,17 @@ module CliBuilder
                     puts "Record information: #{selected_record.as_json}"
                     puts "Please enter a record attribute to update:"
                     column_to_update = gets.chomp
-                    value_before_update = selected_record.column_to_update
+                    value_before_update = selected_record[column_to_update.to_sym]
                     puts "The current value for #{column_to_update} is #{value_before_update}. Please enter the new value:"
                     new_value = gets.chomp
                     selected_record.update({column_to_update => "#{new_value}"})
                     puts "#{column_to_update} has been updated to #{new_value} from #{value_before_update}"
+                    build_crud_menu("#{crud_type.to_s}", records)
                 when :destroy
                     selected_record.destroy
                     puts "Record deleted"
                     new_records = records.filter {|record| record != selected_record}
                     build_crud_menu("#{crud_type.to_s}", new_records)
-                    # TODO: Need to update the recors that show after this
                 else
                 end
            end
