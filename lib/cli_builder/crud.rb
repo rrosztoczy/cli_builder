@@ -36,6 +36,21 @@ module CliBuilder
             self.modelcase(table).constantize
         end
 
+        def self.verify_method(crud_type, records, selected_record)
+            puts "Are you sure you want to #{crud_type} #{selected_record}? (Y/N)"
+            user_verification = gets.chomp
+            case user_verification
+            when "Y" || "y"
+            return
+            when "N" || "n"
+            puts "Did not #{crud_type} #{selected_record}"
+            build_crud_menu("#{crud_type.to_s}", records)
+            else 
+                puts "Please enter Y or N"
+                verify_method
+            end
+        end
+
         def self.build_crud_menu(menu_type, menu_options)
             crud_menu = CliBuilder::Crud.new(title: menu_type.to_s, menu_options: menu_options)
             crud_menu.build_menu
@@ -54,10 +69,12 @@ module CliBuilder
                     value_before_update = selected_record[column_to_update.to_sym]
                     puts "The current value for #{column_to_update} is #{value_before_update}. Please enter the new value:"
                     new_value = gets.chomp
+                    verify_method(crud_type, records, selected_record)
                     selected_record.update({column_to_update => "#{new_value}"})
                     puts "#{column_to_update} has been updated to #{new_value} from #{value_before_update}"
                     build_crud_menu("#{crud_type.to_s}", records)
                 when :destroy
+                    verify_method(crud_type, records, selected_record)
                     selected_record.destroy
                     puts "Record deleted"
                     new_records = records.filter {|record| record != selected_record}
