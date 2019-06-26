@@ -56,6 +56,8 @@ module CliBuilder
             crud_menu.build_menu
         end
 
+        # TODO: To print record info, iterate through column values and print wiht |
+
         def self.write_record_method(crud_type, records, selected_record, selected_table="")
             define_singleton_method :"#{selected_record}" do
                 puts "#{selected_table.find(selected_record.id)}"
