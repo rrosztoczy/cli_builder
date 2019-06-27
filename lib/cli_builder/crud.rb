@@ -4,6 +4,8 @@ require "sinatra/activerecord"
 require_relative "./menu.rb"
 
 module CliBuilder
+    #TODO: The issue I am currently running into is how to write the methods for the crud menus and send them to the menus appropriately. Look into whether they are
+    #Even being written first, then look into how you can send them.
     class Crud < Menu
     #Refactor notes
     # What is this class responsible for? At the moment it has multiple responsibilities:
