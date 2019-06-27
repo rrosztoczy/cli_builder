@@ -42,14 +42,15 @@ module CliBuilder
         # Nothing in this is actually different than the menu class... and the build_crud_menu basically just initializes then uses build_menu...
         # The only difference seems to be the Crud.send() has to_s instead of to_sym in it... can I just use to_s across the board? Memory difference likely
         # Insignificant at the scale of this app so should try.
-        def initialize(title: 'Default Menu Title', menu_options: [])
-            self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
-            self.menu_options = menu_options         
-            self.parent = Menu.main_menu
-            self.previous_menu_option = menu_options.length + 1
-            self.main_menu_option = menu_options.length + 2
-            # CliBuilder::Menu.class.all << self
-        end
+        # How do I get the methods written by the CRUD class to the menu class?
+        # def initialize(title: 'Default Menu Title', menu_options: [])
+        #     self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
+        #     self.menu_options = menu_options         
+        #     self.parent = Menu.main_menu
+        #     self.previous_menu_option = menu_options.length + 1
+        #     self.main_menu_option = menu_options.length + 2
+        #     # CliBuilder::Menu.class.all << self
+        # end
 
         def crud_menu
             self.build_model_menu
@@ -76,7 +77,7 @@ module CliBuilder
         end
 
         def self.build_crud_menu(menu_type, menu_options)
-            crud_menu = CliBuilder::Crud.new(title: menu_type.to_s, menu_options: menu_options)
+            crud_menu = CliBuilder::Menu.new(title: menu_type.to_s, menu_options: menu_options, menu_type: "crud")
             crud_menu.build_menu
         end
 
@@ -139,7 +140,7 @@ module CliBuilder
             crud_types = [:view, :create, :update, :destroy]
             column_names = selected_table.columns.map(&:name)
             crud_types.each do |crud_type|
-                write_crud_by_type(crud_type, column_names, selected_table)
+                Crud.write_crud_by_type(crud_type, column_names, selected_table)
             end
             build_crud_menu("Select CRUD Type", crud_types)
             build_crud_type_menu(crud_types)
@@ -172,22 +173,22 @@ module CliBuilder
                 @methods.push(item.to_sym)
                 puts @methods
             end
-            model_menu = CliBuilder::Crud.new(title: "CRUD Menu", menu_options: @methods)
+            model_menu = CliBuilder::Menu.new(title: "CRUD Menu", menu_options: @methods, menu_type: "crud")
             puts model_menu.class
             model_menu.build_menu
         end
 
-        def call_menu_option(menu_option)
-            if menu_option.class == CliBuilder::Menu
-                menu_option.build_menu
-            elsif self.class == CliBuilder::Crud
-                Crud.send(menu_option.to_s)
-                # Worth using string in menu as well? Or keep that as sym for memory?
-                build_menu
-            else
-                send(menu_option)
-                build_menu
-            end
-        end        
+        # def call_menu_option(menu_option)
+        #     if menu_option.class == CliBuilder::Menu
+        #         menu_option.build_menu
+        #     elsif self.class == CliBuilder::Crud
+        #         Crud.send(menu_option.to_s)
+        #         # Worth using string in menu as well? Or keep that as sym for memory?
+        #         build_menu
+        #     else
+        #         send(menu_option)
+        #         build_menu
+        #     end
+        # end        
     end
 end
