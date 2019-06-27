@@ -5,12 +5,33 @@ require_relative "./menu.rb"
 
 module CliBuilder
     class Crud < Menu
-    # TODO: [] - Complete actual CRUD methods
-    # TODO: [] - Organize files appropriately
-    # TODO: [] - Break out methods for CRUD Menu Generation
-    # TODO: [] = Update ReadME
-    # TODO: [] - Add, update tests and review organization
-    # TODO: [] - Get code review
+    #Refactor notes
+    # What is this class responsible for? At the moment it has multiple responsibilities:
+    #
+    # 1. It is responsible for automating the creation of methods and menu objects to enable user CRUD through a simple CLI interface and the active record ORM
+    #    > It will likley make future development easier if I seperate it into two classes, one which writes the methods, and one which creates the menus
+    # 2. Additionally, there are a variety of other method types in this class that are only tangentially related including formatting, user input prompt and
+    #    manipulation and validations
+    # 3. Finally, there is a dupicate method with added functionality from the inheritied class.
+    #
+    # 4. Another curiosity is my high use of class methods. Are these actually necessary for the automation, or can I be more deliberate about the creation of 
+    #    these menu instances and the messages being sent between them?
+    #
+    # 5. Another interesting thing is my high use of arguments - these should likely be instance variables tied to the appropriate class. This would also make 
+    #    the delineation of the different classes and their responsiblities more clear. Additionally, if I reorg for each menu to have a set of appropriate instance
+    #    variables on creation (or just use the menu class and provide it the appropriate variables) than my data and behaviour will be tighter and less coupled.
+    #
+    # What is each method responsible for? Many of these are tightly coupled.
+
+    #TODO: Extract classes to improve cohesion and enforce SRP and evaluate whether inheritance is necessary at all
+    #TODO: Extract methods to improve cohesion and enforce SRP
+    # WIP: replace heavy argument usage with appropriate variable/message passing
+
+    # Afterwards:
+    #TODO: Complete a dependency evaluation
+
+
+
 
         @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" && table != "ar_internal_metadata"}
         @@crud_type
@@ -18,6 +39,9 @@ module CliBuilder
             puts @@tables
         end
 
+        # Nothing in this is actually different than the menu class... and the build_crud_menu basically just initializes then uses build_menu...
+        # The only difference seems to be the Crud.send() has to_s instead of to_sym in it... can I just use to_s across the board? Memory difference likely
+        # Insignificant at the scale of this app so should try.
         def initialize(title: 'Default Menu Title', menu_options: [])
             self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
             self.menu_options = menu_options         
