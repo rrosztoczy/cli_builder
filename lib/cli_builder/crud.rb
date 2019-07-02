@@ -1,12 +1,11 @@
 require "sinatra"
 require "active_record"
 require "sinatra/activerecord"
-require_relative "./menu.rb"
+# require_relative "./menu.rb"
 
-module CliBuilder
+module Crud
     #TODO: The issue I am currently running into is how to write the methods for the crud menus and send them to the menus appropriately. Look into whether they are
     #Even being written first, then look into how you can send them.
-    class Crud < Menu
     #Refactor notes
     # What is this class responsible for? At the moment it has multiple responsibilities:
     #
@@ -59,11 +58,12 @@ module CliBuilder
         end
 
         # Add a formatting file for this method, modelcase from menu, etc
-        def self.to_table_format(table)
-            self.modelcase(table).constantize
+        def to_table_format(table)
+            #change to format module
+            CliBuilder::Menu.modelcase(table).constantize
         end
 
-        def self.verify_method(crud_type, records, selected_record)
+        def verify_method(crud_type, records, selected_record)
             puts "Are you sure you want to #{crud_type} #{selected_record}? (Y/N)"
             user_verification = gets.chomp
             case user_verification
@@ -78,14 +78,15 @@ module CliBuilder
             end
         end
 
-        def self.build_crud_menu(menu_type, menu_options)
+        def build_crud_menu(menu_type, menu_options)
             crud_menu = CliBuilder::Menu.new(title: menu_type.to_s, menu_options: menu_options, menu_type: "crud")
             crud_menu.build_menu
         end
 
         # TODO: To print record info, iterate through column values and print wiht |
 
-        def self.write_record_method(crud_type, records, selected_record, selected_table="")
+        def write_record_method(crud_type, records, selected_record, selected_table="")
+            puts "I am record method #{self}"
             define_singleton_method :"#{selected_record}" do
                 puts "#{selected_table.find(selected_record.id)}"
                 case crud_type
@@ -113,7 +114,8 @@ module CliBuilder
            end
         end
 
-        def self.write_crud_by_value(crud_type, column_value, records, selected_table="")
+        def write_crud_by_value(crud_type, column_value, records, selected_table="")
+            puts "I am by value #{self}"
             define_singleton_method :"#{column_value}" do
                 records.each do |record|
                     write_record_method(crud_type, records, record, selected_table)
@@ -122,7 +124,8 @@ module CliBuilder
             end
         end
 
-        def self.write_crud_by_model(crud_type, column_name, selected_table="")
+        def write_crud_by_model(crud_type, column_name, selected_table="")
+            puts "I am by model #{self}"
             define_singleton_method :"#{column_name}" do
                 column_values = selected_table.distinct.pluck(column_name)
                 column_values.each do |column_value|
@@ -138,18 +141,19 @@ module CliBuilder
             end
         end
 
-        def self.create_crud_type_menu(selected_table="")
+        def create_crud_type_menu(selected_table="")
             crud_types = [:view, :create, :update, :destroy]
             column_names = selected_table.columns.map(&:name)
             crud_types.each do |crud_type|
-                Crud.write_crud_by_type(crud_type, column_names, selected_table)
+                write_crud_by_type(crud_type, column_names, selected_table)
             end
             build_crud_menu("Select CRUD Type", crud_types)
             build_crud_type_menu(crud_types)
         end
 
         # Writes method to choose crud type
-        def self.write_crud_by_type(crud_type, column_names, selected_table="")
+        def write_crud_by_type(crud_type, column_names, selected_table="")
+            puts "I am by type #{self}"
             define_singleton_method :"#{crud_type}" do
                 @crud_by_options = [:all].concat(column_names)
                 @crud_by_options.each do |column_name|
@@ -163,21 +167,25 @@ module CliBuilder
         end
     
 
-        def self.build_model_menu(selected_table="")
+        def build_model_menu(selected_table="")
         @methods = []
+        model_menu = CliBuilder::Menu.new(title: "CRUD Menu", menu_options: @methods, menu_type: "crud")
             @@tables.each_with_index do |item, index|
                 puts "about to define #{item}"
-                define_singleton_method :"#{item}" do
-                    puts Crud.titlecase(item)
+                puts "I am the model menu #{self} and this item is #{item}"
+                puts model_menu
+                model_menu.define_singleton_method :"#{item}" do
                     selected_table = to_table_format(item)
-                    Crud.create_crud_type_menu(selected_table)
+                    puts "second self"
+                    model_menu.create_crud_type_menu(selected_table)
                 end
                 @methods.push(item.to_sym)
                 puts @methods
             end
-            model_menu = CliBuilder::Menu.new(title: "CRUD Menu", menu_options: @methods, menu_type: "crud")
-            puts model_menu.class
+            model_menu.menu_options = @methods
             model_menu.build_menu
+            # puts model_menu.class
+            # @model_menu.build_menu
         end
 
         # def call_menu_option(menu_option)
@@ -192,5 +200,4 @@ module CliBuilder
         #         build_menu
         #     end
         # end        
-    end
 end
