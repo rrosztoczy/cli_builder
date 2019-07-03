@@ -1,12 +1,13 @@
 require "sinatra"
 require "active_record"
 require "sinatra/activerecord"
-# require "../cli_builder.rb"
+require_relative "./crud.rb"
 
 
 module CliBuilder
     class Menu
-        attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option
+        include Crud
+        attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option, :menu_type
         @@all = [];
         @@main_menu = {};
 #******************************************Initialize and set key variables*************************************
@@ -23,14 +24,28 @@ module CliBuilder
             @@main_menu = menu
         end
 
-        def initialize(title: 'Default Menu Title', menu_options: [])
+        def menu_options
+            @menu_options
+        end
+
+        def menu_options=(array)
+            @menu_options = array
+            self.previous_menu_option = menu_options.length + 1
+            self.main_menu_option = menu_options.length + 2
+        end
+
+
+
+        def initialize(title: 'Default Menu Title', menu_options: [], menu_type: "default")
             self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
+            self.menu_type = menu_type
             self.menu_options = menu_options         
             assign_parents(menu_options)
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
             self.class.all << self
-            self.class.main_menu = self 
+            # Issue here... crud menus are created on selection not prior so the last one selected will always be main menu...
+            self.class.main_menu = self if self.menu_type === "default"
         end
 
 # **************************************Menu Print and Build Methods**********************************************
@@ -145,13 +160,14 @@ module CliBuilder
         def call_menu_option(menu_option)
             if menu_option.class == CliBuilder::Menu
                 menu_option.build_menu
-            elsif self.class == CliBuilder::Crud
-                Crud.send(menu_option.to_sym)
-                build_menu
-            elsif menu_option === :crud_menu
-                Crud.build_model_menu
+            # elsif self.class == CliBuilder::Crud
+            #     Crud.send(menu_option.to_sym)
+            #     build_menu
+            # elsif menu_option === :crud_menu
+            #     Crud.build_model_menu
             else
-                send(menu_option)
+                puts "self send is going to is #{self}"
+                send(menu_option.to_s)
                 build_menu
             end
         end
@@ -160,6 +176,7 @@ module CliBuilder
             menu_options.each_with_index do |menu_option, index|
                 case user_input
                 when previous_menu_option
+                    puts "why pmo is #{previous_menu_option}"
                     system "clear" or system "cls"
                     parent.build_menu
                 when main_menu_option

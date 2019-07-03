@@ -31,7 +31,7 @@ def call_menu_option(menu_option)
   elsif menu_option === :crud_menu
       Crud.build_model_menu
   else
-      send(menu_option)
+      send(menu_option.to_sym)
       Menu.build_menu
   end
 end
