@@ -36,6 +36,7 @@ module Crud
 
         @@tables =  ActiveRecord::Base.connection.tables.select {|table| table != "schema_migrations" && table != "ar_internal_metadata"}
         @@crud_type
+        @@selected_table
         def self.get_tables
             puts @@tables
         end
@@ -52,6 +53,7 @@ module Crud
         #     self.main_menu_option = menu_options.length + 2
         #     # CliBuilder::Menu.class.all << self
         # end
+        #Next step is to get view working by figuring out if it is hitting the right menu and rearranging if necessary
 
         def crud_menu
             self.build_model_menu
@@ -85,10 +87,10 @@ module Crud
 
         # TODO: To print record info, iterate through column values and print wiht |
 
-        def write_record_method(crud_type, records, selected_record, selected_table="")
+        def write_record_method(crud_type, records, selected_record)
             puts "I am record method #{self}"
             define_singleton_method :"#{selected_record}" do
-                puts "#{selected_table.find(selected_record.id)}"
+                puts "#{@@selected_table.find(selected_record.id)}"
                 case crud_type
                 when :view
                     puts "Record information: #{selected_record.as_json}"
@@ -114,51 +116,53 @@ module Crud
            end
         end
 
-        def write_crud_by_value(crud_type, column_value, records, selected_table="")
+        def write_crud_by_value(menu, crud_type, column_value, records)
             puts "I am by value #{self}"
             define_singleton_method :"#{column_value}" do
                 records.each do |record|
-                    write_record_method(crud_type, records, record, selected_table)
+                    write_record_method(crud_type, records, record)
                 end
                 build_crud_menu("#{crud_type.to_s}", records)
             end
         end
 
-        def write_crud_by_model(crud_type, column_name, selected_table="")
+        def write_crud_by_model(menu, crud_type, column_name)
             puts "I am by model #{self}"
-            define_singleton_method :"#{column_name}" do
-                column_values = selected_table.distinct.pluck(column_name)
+            column_values = @@selected_table.distinct.pluck(column_name)
+            crud_by_value_menu = CliBuilder::Menu.new(title: "Choose Value for CRUD", menu_options: column_values, menu_type: "crud")
+            menu.define_singleton_method :"#{column_name}" do
                 column_values.each do |column_value|
                     if column_name === :all
-                        records = selected_table.find_each.to_a
+                        records = @@selected_table.find_each.to_a
                     else
-                        records = selected_table.where("#{column_name}=?", column_value).to_a
+                        records = @@selected_table.where("#{column_name}=?", column_value).to_a
                     end
                     puts "records are #{records}"
-                    write_crud_by_value(crud_type, column_value, records, selected_table)
+                    write_crud_by_value(crud_by_value_menu, crud_type, column_value, records)
                 end
-                build_crud_menu("Choose Records by Column Value", [:all].concat(column_values))
             end
+            crud_type_menu.build_menu
         end
 
-        def create_crud_type_menu(selected_table="")
+        def create_crud_type_menu
             crud_types = [:view, :create, :update, :destroy]
-            column_names = selected_table.columns.map(&:name)
+            crud_type_menu = CliBuilder::Menu.new(title: "Select Type of CRUD", menu_options: crud_types, menu_type: "crud")
             crud_types.each do |crud_type|
-                write_crud_by_type(crud_type, column_names, selected_table)
+                write_crud_by_type(crud_type_menu, crud_type)
             end
-            build_crud_menu("Select CRUD Type", crud_types)
-            build_crud_type_menu(crud_types)
+            crud_type_menu.build_menu
         end
 
         # Writes method to choose crud type
-        def write_crud_by_type(crud_type, column_names, selected_table="")
+        def write_crud_by_type(menu, crud_type)
             puts "I am by type #{self}"
-            define_singleton_method :"#{crud_type}" do
+            column_names = @@selected_table.columns.map(&:name)
+            crud_column_menu = CliBuilder::Menu.new(title: "Select Type of CRUD", menu_options: column_names, menu_type: "crud")
+            menu.define_singleton_method :"#{crud_type}" do
                 @crud_by_options = [:all].concat(column_names)
                 @crud_by_options.each do |column_name|
                     puts "About to defined#{column_name} as #{column_name.class}"
-                    write_crud_by_model(crud_type, column_name, selected_table)
+                    write_crud_by_model(crud_column_menu, crud_type, column_name)
                 end
                 build_crud_menu("Find Records by Column", [:all].concat(column_names))
 
@@ -167,7 +171,7 @@ module Crud
         end
     
 
-        def build_model_menu(selected_table="")
+        def build_model_menu
         @methods = []
         model_menu = CliBuilder::Menu.new(title: "CRUD Menu", menu_options: @methods, menu_type: "crud")
             @@tables.each_with_index do |item, index|
@@ -175,9 +179,9 @@ module Crud
                 puts "I am the model menu #{self} and this item is #{item}"
                 puts model_menu
                 model_menu.define_singleton_method :"#{item}" do
-                    selected_table = to_table_format(item)
+                    @@selected_table = to_table_format(item)
                     puts "second self"
-                    model_menu.create_crud_type_menu(selected_table)
+                    model_menu.create_crud_type_menu
                 end
                 @methods.push(item.to_sym)
                 puts @methods
