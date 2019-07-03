@@ -167,7 +167,7 @@ module CliBuilder
             #     Crud.build_model_menu
             else
                 puts "self send is going to is #{self}"
-                send(menu_option.to_sym)
+                send(menu_option.to_s)
                 build_menu
             end
         end

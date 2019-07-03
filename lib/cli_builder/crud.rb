@@ -87,9 +87,9 @@ module Crud
 
         # TODO: To print record info, iterate through column values and print wiht |
 
-        def write_record_method(crud_type, records, selected_record)
+        def write_record_method(menu, crud_type, records, selected_record)
             puts "I am record method #{self}"
-            define_singleton_method :"#{selected_record}" do
+            menu.define_singleton_method :"#{selected_record}" do
                 puts "#{@@selected_table.find(selected_record.id)}"
                 case crud_type
                 when :view
@@ -118,11 +118,12 @@ module Crud
 
         def write_crud_by_value(menu, crud_type, column_value, records)
             puts "I am by value #{self}"
-            define_singleton_method :"#{column_value}" do
+            crud_by_record_menu = CliBuilder::Menu.new(title: "Choose Record for CRUD", menu_options: records, menu_type: "crud")
+            menu.define_singleton_method :"#{column_value}" do
                 records.each do |record|
-                    write_record_method(crud_type, records, record)
+                    write_record_method(crud_by_record_menu, crud_type, records, record)
                 end
-                build_crud_menu("#{crud_type.to_s}", records)
+                crud_by_record_menu.build_menu
             end
         end
 
