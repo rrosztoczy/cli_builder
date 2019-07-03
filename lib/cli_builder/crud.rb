@@ -104,13 +104,15 @@ module Crud
                     verify_method(crud_type, records, selected_record)
                     selected_record.update({column_to_update => "#{new_value}"})
                     puts "#{column_to_update} has been updated to #{new_value} from #{value_before_update}"
-                    build_crud_menu("#{crud_type.to_s}", records)
+                    # build_crud_menu("#{crud_type.to_s}", records)
+                    menu.build_menu
                 when :destroy
                     verify_method(crud_type, records, selected_record)
                     selected_record.destroy
                     puts "Record deleted"
                     new_records = records.filter {|record| record != selected_record}
-                    build_crud_menu("#{crud_type.to_s}", new_records)
+                    # build_crud_menu("#{crud_type.to_s}", new_records)
+                    menu.build_menu
                 else
                 end
            end
