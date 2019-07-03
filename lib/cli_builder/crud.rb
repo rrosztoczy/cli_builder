@@ -140,8 +140,8 @@ module Crud
                     puts "records are #{records}"
                     write_crud_by_value(crud_by_value_menu, crud_type, column_value, records)
                 end
+                crud_by_value_menu.build_menu
             end
-            crud_type_menu.build_menu
         end
 
         def create_crud_type_menu
@@ -156,18 +156,20 @@ module Crud
         # Writes method to choose crud type
         def write_crud_by_type(menu, crud_type)
             puts "I am by type #{self}"
+            puts "#{@@selected_table} is the selected table"
             column_names = @@selected_table.columns.map(&:name)
-            crud_column_menu = CliBuilder::Menu.new(title: "Select Type of CRUD", menu_options: column_names, menu_type: "crud")
+            puts "#{column_names} are the column names"
+            crud_by_options = [:all].concat(column_names)
+            puts "#{@crud_by_options} are teh options"
+            crud_column_menu = CliBuilder::Menu.new(title: "Select Type of CRUD", menu_options: crud_by_options, menu_type: "crud")
             menu.define_singleton_method :"#{crud_type}" do
-                @crud_by_options = [:all].concat(column_names)
-                @crud_by_options.each do |column_name|
+                crud_by_options.each do |column_name|
                     puts "About to defined#{column_name} as #{column_name.class}"
                     write_crud_by_model(crud_column_menu, crud_type, column_name)
                 end
-                build_crud_menu("Find Records by Column", [:all].concat(column_names))
-
+                crud_column_menu.build_menu
             end
-
+            puts "method has been defined"
         end
     
 
