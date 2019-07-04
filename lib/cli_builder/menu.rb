@@ -43,7 +43,11 @@ module CliBuilder
             assign_parents(menu_options)
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
+            puts "#{self.title} is title"
             self.class.all << self
+            self.class.all.length > 0 ? self.parent = self.class.all[self.class.all.index(self) - 1] : nil
+            puts "#{self.parent} is parent"
+ 
             # Issue here... crud menus are created on selection not prior so the last one selected will always be main menu...
             self.class.main_menu = self if self.menu_type === "default"
         end
@@ -97,6 +101,7 @@ module CliBuilder
             index + 1
         end
 
+        # TODO: Need to update assign parent to work with CRUDs well...
         def assign_parent(menu_option)
             menu_option.parent = self
         end
