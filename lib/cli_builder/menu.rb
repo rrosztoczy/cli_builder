@@ -7,7 +7,7 @@ require_relative "./crud.rb"
 module CliBuilder
     class Menu
         include Crud
-        attr_accessor :title, :menu_options, :parent, :previous_menu_option, :main_menu_option, :menu_type
+        attr_accessor :title, :menu_options, :parent, :main_menu_option, :menu_type
         @@all = [];
         @@main_menu = {};
 #******************************************Initialize and set key variables*************************************
@@ -30,8 +30,7 @@ module CliBuilder
 
         def menu_options=(array)
             @menu_options = array
-            self.previous_menu_option = menu_options.length + 1
-            self.main_menu_option = menu_options.length + 2
+            self.main_menu_option = menu_options.length + 1
         end
 
 
@@ -40,17 +39,8 @@ module CliBuilder
             self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
             self.menu_type = menu_type
             self.menu_options = menu_options         
-            # assign_parents(menu_options)
-            self.previous_menu_option = menu_options.length + 1
-            self.main_menu_option = menu_options.length + 2
-            puts "#{self.title} is title"
+            self.main_menu_option = menu_options.length + 1
             self.class.all << self
-            # TODO: previous menu works for a time and then doesn't... it may be because once a menu has been built I rebuild if I go back instead of going back to that menu
-            # This means once the menu has been created I should be accessing that instead of creating another one.. that is a big refactor too
-            self.class.all.length > 0 ? self.parent = self.class.all[self.class.all.index(self) - 1] : nil
-            puts "#{self.parent} is parent"
- 
-            # Issue here... crud menus are created on selection not prior so the last one selected will always be main menu...
             self.class.main_menu = self if self.menu_type === "default"
         end
 
@@ -72,9 +62,8 @@ module CliBuilder
                 printMenuOption(menu_option: menu_option, index: index)
             end
 
-            #Do not add Back options to main menu
+            #Do not add main menu option to main menu
             if self != self.class.main_menu
-                printPreviousMenuOption
                 printMainMenuOption
             end
             printPrompt
@@ -103,19 +92,6 @@ module CliBuilder
             index + 1
         end
 
-        # TODO: Need to update assign parent to work with CRUDs well...
-        def assign_parent(menu_option)
-            menu_option.parent = self
-        end
-
-        def assign_parents(menu_options)
-            menu_options.each do | menu_option | 
-                if menu_option.class == self.class
-                    assign_parent(menu_option)
-                end
-            end 
-        end
-
         # Pull into clu_builder ##############
         def get_user_input
             user_input = gets.chomp
@@ -130,10 +106,6 @@ module CliBuilder
 
         def printMainMenuOption
             puts "#{main_menu_option}. Back to Main Menu"
-        end
-
-        def printPreviousMenuOption
-            puts "#{previous_menu_option}. Back to Previous Menu"
         end
 
         def printMenuTitle(menu_option:, index:)
@@ -182,10 +154,6 @@ module CliBuilder
         def execute_application_logic(user_input)
             menu_options.each_with_index do |menu_option, index|
                 case user_input
-                when previous_menu_option
-                    puts "why pmo is #{previous_menu_option}"
-                    system "clear" or system "cls"
-                    parent.build_menu
                 when main_menu_option
                     system "clear" or system "cls"
                     self.class.main_menu.build_menu

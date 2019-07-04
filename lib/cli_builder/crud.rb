@@ -161,18 +161,5 @@ module Crud
             end
             model_menu.menu_options = @methods
             model_menu.build_menu
-        end
-
-        # def call_menu_option(menu_option)
-        #     if menu_option.class == CliBuilder::Menu
-        #         menu_option.build_menu
-        #     elsif self.class == CliBuilder::Crud
-        #         Crud.send(menu_option.to_s)
-        #         # Worth using string in menu as well? Or keep that as sym for memory?
-        #         build_menu
-        #     else
-        #         send(menu_option)
-        #         build_menu
-        #     end
-        # end        
+        end   
 end
