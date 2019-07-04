@@ -40,11 +40,13 @@ module CliBuilder
             self.title = title.downcase.gsub(/\s+/,"_").downcase.to_sym
             self.menu_type = menu_type
             self.menu_options = menu_options         
-            assign_parents(menu_options)
+            # assign_parents(menu_options)
             self.previous_menu_option = menu_options.length + 1
             self.main_menu_option = menu_options.length + 2
             puts "#{self.title} is title"
             self.class.all << self
+            # TODO: previous menu works for a time and then doesn't... it may be because once a menu has been built I rebuild if I go back instead of going back to that menu
+            # This means once the menu has been created I should be accessing that instead of creating another one.. that is a big refactor too
             self.class.all.length > 0 ? self.parent = self.class.all[self.class.all.index(self) - 1] : nil
             puts "#{self.parent} is parent"
  
